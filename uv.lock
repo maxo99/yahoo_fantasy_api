@@ -448,7 +448,7 @@ wheels = [
 [[package]]
 name = "yahoo-fantasy-api"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "docopt" },
     { name = "mock" },
