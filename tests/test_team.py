@@ -1,9 +1,7 @@
-#!/bin/python
-
-import os
 import datetime
-import pytest
+import os
 
+import pytest
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -61,7 +59,7 @@ def test_proposed_trades(mock_team):
 
 
 def test__construct_trade_xml(mock_team):
-    with open(f"{DIR_PATH}/accept_trade.xml", "r") as file:
+    with open(f"{DIR_PATH}/accept_trade.xml") as file:
         expected_xml = file.read().replace("  ", "\t")
 
     transaction_key = "396.l.49770.pt.1"
@@ -74,7 +72,7 @@ def test__construct_trade_xml(mock_team):
 
 
 def test__construct_trade_proposal_xml(mock_team):
-    with open(f"{DIR_PATH}/trade_proposal.xml", "r") as file:
+    with open(f"{DIR_PATH}/trade_proposal.xml") as file:
         expected_xml = file.read().replace("  ", "\t")
 
     tradee_team_key = "248.l.55438.t.4"
@@ -90,7 +88,7 @@ def test__construct_trade_proposal_xml(mock_team):
 
 
 def test__construct_transaction_xml(mock_team):
-    with open(f"{DIR_PATH}/add_drop_with_faab.xml", "r") as file:
+    with open(f"{DIR_PATH}/add_drop_with_faab.xml") as file:
         expected_xml = file.read().replace("  ", "\t")
 
     action = "add/drop"
@@ -106,7 +104,7 @@ def test__construct_transaction_xml(mock_team):
 
 
 def test__construct_transaction_xml_with_faab(mock_team):
-    with open(f"{DIR_PATH}/add_drop_no_faab.xml", "r") as file:
+    with open(f"{DIR_PATH}/add_drop_no_faab.xml") as file:
         expected_xml = file.read().replace("  ", "\t")
 
     action = "add/drop"
@@ -134,7 +132,7 @@ def test_change_roster(mock_team):
     assert "<date>2019-10-07</date>" not in mock_team.yhandler.roster_xml
     assert "<week>2</week>" in mock_team.yhandler.roster_xml
 
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         mock_team.change_positions("3", plyrs)
 
 

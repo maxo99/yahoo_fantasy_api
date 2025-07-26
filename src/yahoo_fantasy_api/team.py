@@ -1,10 +1,11 @@
 #!/bin/python
 
-from yahoo_fantasy_api import yhandler
-import objectpath
 import datetime
 from xml.dom.minidom import Document
 
+import objectpath
+
+from yahoo_fantasy_api import yhandler
 from yahoo_fantasy_api.utils import create_element
 
 
@@ -285,9 +286,9 @@ class Team:
                     tran["tradee_players"].append(plyr)
 
             plyr_it = t.execute(
-                """
-                $..transactions.'{}'..(player_id,full,position_type,
-                                      source_team_key)""".format(i)
+                f"""
+                $..transactions.'{i}'..(player_id,full,position_type,
+                                      source_team_key)"""
             )
             key_mapper = {"full": "name"}
             plyr = {}
@@ -529,7 +530,7 @@ class Team:
 
         player = root.appendChild(doc.createElement("player"))
         player.appendChild(doc.createElement("player_key")).appendChild(
-            doc.createTextNode("{}.p.{}".format(self.league_prefix, int(player_id)))
+            doc.createTextNode(f"{self.league_prefix}.p.{int(player_id)}")
         )
         tdata = player.appendChild(doc.createElement("transaction_data"))
         tdata.appendChild(doc.createElement("type")).appendChild(

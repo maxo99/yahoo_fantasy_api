@@ -1,8 +1,7 @@
-#!/bin/python
-
-import pytest
-import yahoo_fantasy_api as yfa
 import mock_yhandler
+import pytest
+
+import yahoo_fantasy_api as yfa
 
 
 @pytest.fixture()

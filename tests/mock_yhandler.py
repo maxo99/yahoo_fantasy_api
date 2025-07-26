@@ -1,5 +1,3 @@
-#!/bin/python
-
 import json
 import os
 
@@ -29,7 +27,7 @@ class YHandler:
         :type seasons: list[str]
         :return: JSON document of the request.
         """
-        with open(self.dir_path + "/sample.users_leagues.json", "r") as f:
+        with open(self.dir_path + "/sample.users_leagues.json") as f:
             return json.load(f)
 
     def get_teams_raw(self):
@@ -37,7 +35,7 @@ class YHandler:
 
         :return: JSON document of the request.
         """
-        with open(self.dir_path + "/sample.users_teams.json", "r") as f:
+        with open(self.dir_path + "/sample.users_teams.json") as f:
             return json.load(f)
 
     def get_league_teams_raw(self, league_id):
@@ -45,7 +43,7 @@ class YHandler:
 
         :return: JSON document of the request.
         """
-        with open(self.dir_path + "/sample.league_teams.json", "r") as f:
+        with open(self.dir_path + "/sample.league_teams.json") as f:
             return json.load(f)
 
     def get_standings_raw(self, league_id):
@@ -55,7 +53,7 @@ class YHandler:
         :type league_id: str
         :return: JSON document of the request.
         """
-        with open(self.dir_path + "/sample.standings.json", "r") as f:
+        with open(self.dir_path + "/sample.standings.json") as f:
             return json.load(f)
 
     def get_settings_raw(self, league_id):
@@ -69,8 +67,8 @@ class YHandler:
             id = "396.l.21484"
         else:
             id = "388.l.27081"
-        fn = "{}/sample.league_settings.{}.json".format(self.dir_path, id)
-        with open(fn, "r") as f:
+        fn = f"{self.dir_path}/sample.league_settings.{id}.json"
+        with open(fn) as f:
             return json.load(f)
 
     def get_matchup_raw(self, team_key, week):
@@ -82,7 +80,7 @@ class YHandler:
         :type week: int
         :return: JSON of the request
         """
-        with open(self.dir_path + "/sample.matchup.json", "r") as f:
+        with open(self.dir_path + "/sample.matchup.json") as f:
             return json.load(f)
 
     def get_roster_raw(self, team_key, week=None, day=None):
@@ -96,7 +94,7 @@ class YHandler:
         :type day: datetime.date
         :return: JSON of the request
         """
-        with open(self.dir_path + "/sample.team_roster.json", "r") as f:
+        with open(self.dir_path + "/sample.team_roster.json") as f:
             return json.load(f)
 
     def get_scoreboard_raw(self, league_id, week=None):
@@ -112,7 +110,7 @@ class YHandler:
             fn = self.dir_path + "/sample.scoreboard.noweek.json"
         else:
             fn = self.dir_path + "/sample.scoreboard.week12.json"
-        with open(fn, "r") as f:
+        with open(fn) as f:
             return json.load(f)
 
     def get_players_raw(self, league_id, start, status, position=None):
@@ -125,33 +123,33 @@ class YHandler:
         else:
             assert start == 50
             pg = "3"
-        fn = self.dir_path + "/sample.players.freeagents.C.pg.{}.json".format(pg)
-        with open(fn, "r") as f:
+        fn = self.dir_path + f"/sample.players.freeagents.C.pg.{pg}.json"
+        with open(fn) as f:
             return json.load(f)
 
     def get_percent_owned_raw(self, league_id, player_ids):
         fn = self.dir_path + "/sample.percent_owned.json"
-        with open(fn, "r") as f:
+        with open(fn) as f:
             return json.load(f)
 
     def get_player_ownership_raw(self, league_id, player_ids):
         if player_ids == 27564:
             fn = self.dir_path + "/sample.player_ownership_freeagent.json"
-            with open(fn, "r") as f:
+            with open(fn) as f:
                 return json.load(f)
         else:
             fn = self.dir_path + "/sample.player_ownership.json"
-            with open(fn, "r") as f:
+            with open(fn) as f:
                 return json.load(f)
 
     def get_team_transactions(self, league_id, team_key, tran_type):
         fn = self.dir_path + "/sample.pending_trade_transaction.json"
-        with open(fn, "r") as f:
+        with open(fn) as f:
             return json.load(f)
 
     def get_player_stats_raw(self, league_id, player_ids, req_type, day, week, season):
-        fn = "{}/sample.player_stats.{}.json".format(self.dir_path, league_id)
-        with open(fn, "r") as f:
+        fn = f"{self.dir_path}/sample.player_stats.{league_id}.json"
+        with open(fn) as f:
             return json.load(f)
 
     def get_draftresults_raw(self, league_id):
@@ -162,18 +160,18 @@ class YHandler:
         :type league_id: str
         :return: Response from the GET call
         """
-        fn = "{}/sample.draftresults.{}.json".format(self.dir_path, league_id)
-        with open(fn, "r") as f:
+        fn = f"{self.dir_path}/sample.draftresults.{league_id}.json"
+        with open(fn) as f:
             return json.load(f)
 
     def get_player_raw(self, league_id, search=None, ids=None):
         if search is not None:
-            fn = "{}/sample.player_details.{}.json".format(self.dir_path, search)
+            fn = f"{self.dir_path}/sample.player_details.{search}.json"
         elif ids is not None:
-            fn = "{}/sample.player_details.ids.json".format(self.dir_path)
+            fn = f"{self.dir_path}/sample.player_details.ids.json"
         else:
             assert False, "Unsupported lookup"
-        with open(fn, "r") as f:
+        with open(fn) as f:
             return json.load(f)
 
     def get_game_raw(self, game_code):
@@ -183,7 +181,7 @@ class YHandler:
         :type game_code: str
         :return: JSON document of the request.
         """
-        with open(self.dir_path + "/sample.game_details.json", "r") as f:
+        with open(self.dir_path + "/sample.game_details.json") as f:
             return json.load(f)
 
     def get_transactions_raw(self, league_id, tran_types, count):
@@ -198,7 +196,7 @@ class YHandler:
         :type count str
         :return: JSON document of the request.
         """
-        with open(self.dir_path + "/sample.transactions.json", "r") as f:
+        with open(self.dir_path + "/sample.transactions.json") as f:
             return json.load(f)
 
     def put_roster(self, team_key, xml):
@@ -213,5 +211,5 @@ class YHandler:
         :type team_keys: list[str]
         :return: JSON document of the request.
         """
-        with open(self.dir_path + "/sample.team_details.json", "r") as f:
+        with open(self.dir_path + "/sample.team_details.json") as f:
             return json.load(f)

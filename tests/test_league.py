@@ -1,8 +1,8 @@
-#!/bin/python
+import datetime
+
+import pytest
 
 import yahoo_fantasy_api as yfa
-import datetime
-import pytest
 
 
 def test_standings(mock_mlb_league):

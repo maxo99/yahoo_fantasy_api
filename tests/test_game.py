@@ -1,7 +1,6 @@
-#!/bin/python
+import mock_yhandler
 
 import yahoo_fantasy_api as yfa
-import mock_yhandler
 
 
 def test_ids(sc):
