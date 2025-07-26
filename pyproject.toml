@@ -4,13 +4,22 @@ version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
     "docopt>=0.6.2",
-    "mock>=5.2.0",
     "objectpath>=0.6.1",
-    "pytest>=8.4.1",
     "pytz>=2025.2",
+    "yahoo-oauth>=2.1.1",
+]
+
+[dependency-groups]
+dev = [
+    # Testing
+    "pytest",
+    "mock>=5.2.0",
+    # Experimentation
+    "ipykernel",
+    "pandas",
+    # Document generation
     "sphinx>=8.2.3",
     "sphinx-rtd-theme>=3.0.2",
-    "yahoo-oauth>=2.1.1",
 ]
 
 
