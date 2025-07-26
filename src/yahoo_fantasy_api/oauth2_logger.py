@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import logging
+
 import yahoo_oauth
 
 
