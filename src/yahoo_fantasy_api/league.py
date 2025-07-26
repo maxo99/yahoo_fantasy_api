@@ -1,10 +1,10 @@
-#!/bin/python
+import datetime
+import re
+
+import objectpath
 
 import yahoo_fantasy_api as yfa
 from yahoo_fantasy_api import yhandler
-import objectpath
-import datetime
-import re
 
 
 class League:

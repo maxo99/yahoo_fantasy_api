@@ -1,7 +1,8 @@
-#!/bin/python
+from collections.abc import Iterable
 
-from yahoo_fantasy_api import yhandler, league
 import objectpath
+
+from yahoo_fantasy_api import league, yhandler
 
 
 class Game:
@@ -27,7 +28,11 @@ class Game:
         :rtype: str
         """
         t = objectpath.Tree(self.yhandler.get_game_raw(self.code))
+        if not t:
+            raise ValueError(f"Game {self.code} not found")
         jfilter = t.execute("$..(game_id)")
+        if not isinstance(jfilter, Iterable):
+            raise ValueError(f"Game {self.code} not found")
         id = ""
         for row in jfilter:
             id = row["game_id"]
