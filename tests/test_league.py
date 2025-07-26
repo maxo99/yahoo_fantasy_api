@@ -1,6 +1,5 @@
 #!/bin/python
 
-from yahoo_fantasy_api.tests.conftest import mock_mlb_league
 import yahoo_fantasy_api as yfa
 import datetime
 import pytest
