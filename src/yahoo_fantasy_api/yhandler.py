@@ -396,7 +396,7 @@ class YHandler:
         elif req_type in ["lastweek", "lastmonth"]:
             return f"type={req_type}"
         else:
-            assert False, f"Unknown req_type type: {req_type}"
+            raise AssertionError(f"Unknown req_type type: {req_type}")
 
     def get_game_raw(self, game_code):
         """Return the raw JSON when requesting details of a game.
