@@ -27,10 +27,10 @@ class Game:
         :rtype: str
         """
         t = objectpath.Tree(self.yhandler.get_game_raw(self.code))
-        jfilter = t.execute('$..(game_id)')
-        id = ''
+        jfilter = t.execute("$..(game_id)")
+        id = ""
         for row in jfilter:
-            id = row['game_id']
+            id = row["game_id"]
         return id
 
     def to_league(self, league_id):
@@ -44,10 +44,17 @@ class Game:
         lg = league.League(self.sc, league_id, handler=self.yhandler)
         return lg
 
-    def league_ids(self, year=None, is_available=False, game_types=None, game_codes=None, seasons=None):
+    def league_ids(
+        self,
+        year=None,
+        is_available=False,
+        game_types=None,
+        game_codes=None,
+        seasons=None,
+    ):
         """Return the Yahoo! league IDs that the current user played in
 
-        :param year: Optional year, when provide _league_ids_deprecated() will be used to fetch the league ids 
+        :param year: Optional year, when provide _league_ids_deprecated() will be used to fetch the league ids
         :type is_available: int
         :param is_available: Optional flag to filter out leagues that are not available
         :type is_available: bool
@@ -62,8 +69,15 @@ class Game:
         if year is not None:
             return self._league_ids_deprecated(year=year)
 
-        t = objectpath.Tree(self.yhandler.get_leagues_raw(is_available=is_available, game_types=game_types, game_codes=game_codes,seasons=seasons))
-        ids = list(t.execute('$..league_key'))
+        t = objectpath.Tree(
+            self.yhandler.get_leagues_raw(
+                is_available=is_available,
+                game_types=game_types,
+                game_codes=game_codes,
+                seasons=seasons,
+            )
+        )
+        ids = list(t.execute("$..league_key"))
         return ids
 
     def _league_ids_deprecated(self, year=None):
@@ -74,7 +88,7 @@ class Game:
         :returns: List of league ids
         """
         t = objectpath.Tree(self.yhandler.get_teams_raw())
-        jfilter = t.execute('$..(team_key,season,code)')
+        jfilter = t.execute("$..(team_key,season,code)")
         league_applies = False
         ids = []
         for row in jfilter:
@@ -82,17 +96,16 @@ class Game:
             # A row that has the season/code, then all of the leagues that it
             # applies too.  Check if the subsequent league applies each time we
             # get the season/code pair.
-            if 'season' in row and 'code' in row:
-                league_applies = row['code'] == self.code
+            if "season" in row and "code" in row:
+                league_applies = row["code"] == self.code
                 if league_applies is True and year is not None:
-                    league_applies = int(row['season']) == int(year)
+                    league_applies = int(row["season"]) == int(year)
             elif league_applies:
-                assert('team_key' in row)
-                ids.append(self._extract_id_from_team_key(row['team_key']))
+                assert "team_key" in row
+                ids.append(self._extract_id_from_team_key(row["team_key"]))
         # Return leagues in deterministic order
         ids.sort()
         return ids
-
 
     def _extract_id_from_team_key(self, t):
         """Given a team key, extract just the league id from it
@@ -100,5 +113,5 @@ class Game:
         A team key is defined as:
             <game#>.l.<league#>.t.<team#>
         """
-        assert(t.find(".t.") > 0), "Doesn't look like a valid team key: " + t
-        return t[0:t.find(".t.")]
+        assert t.find(".t.") > 0, "Doesn't look like a valid team key: " + t
+        return t[0 : t.find(".t.")]

@@ -21,8 +21,8 @@ class Team:
     def __init__(self, sc, team_key):
         self.sc = sc
         self.team_key = team_key
-        self.league_id = team_key[0:team_key.find(".t")]
-        self.league_prefix = team_key[0:team_key.find('.')]
+        self.league_id = team_key[0 : team_key.find(".t")]
+        self.league_prefix = team_key[0 : team_key.find(".")]
         self.yhandler = yhandler.YHandler(sc)
 
     def inject_yhandler(self, yhandler):
@@ -39,8 +39,10 @@ class Team:
          'team_logos': [{'team_logo': {'size': 'large', 'url': 'http://l.yimg
         """
         t = objectpath.Tree(self.yhandler.get_teams_by_keys_raw([self.team_key]))
-        json = t.execute('$..teams..team[0]')
-        details = {k: v for dic in [val for val in json if val != []] for k, v in dic.items()}
+        json = t.execute("$..teams..team[0]")
+        details = {
+            k: v for dic in [val for val in json if val != []] for k, v in dic.items()
+        }
         return details
 
     def matchup(self, week):
@@ -54,10 +56,10 @@ class Team:
         388.l.27081.t.9
         """
         t = objectpath.Tree(self.yhandler.get_matchup_raw(self.team_key, week))
-        json = t.execute('$..matchups..(team_key)')
+        json = t.execute("$..matchups..(team_key)")
         for k in json:
-            if 'team_key' in k:
-                this_team_key = k['team_key']
+            if "team_key" in k:
+                this_team_key = k["team_key"]
                 if this_team_key != self.team_key:
                     return this_team_key
         raise RuntimeError("Could not find opponent")
@@ -87,9 +89,9 @@ class Team:
         """
         raw = self.yhandler.get_roster_raw(self.team_key, week=week, day=day)
         t = objectpath.Tree(raw)
-        it = t.execute('''
+        it = t.execute("""
                         $..(player_id,full,position_type,eligible_positions,
-                            selected_position,status)''')
+                            selected_position,status)""")
 
         def _compact_selected_pos(j):
             return j["selected_position"][1]["position"]
@@ -97,14 +99,16 @@ class Team:
         def _compact_eligible_pos(j):
             compact_pos = []
             for p in j["eligible_positions"]:
-                compact_pos.append(p['position'])
+                compact_pos.append(p["position"])
             return compact_pos
 
         roster = []
         try:
             while True:
-                plyr = {"player_id": int(next(it)["player_id"]),
-                        "name": next(it)["full"]}
+                plyr = {
+                    "player_id": int(next(it)["player_id"]),
+                    "name": next(it)["full"],
+                }
                 next_item = next(it)
                 plyr["status"] = next_item["status"]
                 # The query we use to pick out only certain fields will find
@@ -198,8 +202,7 @@ class Team:
 
         >>> tm.add_and_drop_players(6770, 6767)
         """
-        xml = self._construct_transaction_xml("add/drop", add_player_id,
-                                              drop_player_id)
+        xml = self._construct_transaction_xml("add/drop", add_player_id, drop_player_id)
         self.yhandler.post_transactions(self.league_id, xml)
 
     def claim_and_drop_players(self, add_player_id, drop_player_id, faab=None):
@@ -259,14 +262,15 @@ class Team:
           'tradee_players': [{'player_id': '4064',
             'name': 'Kris Letang', 'position_type': 'P'}]}]
         """
-        j = self.yhandler.get_team_transactions(self.league_id, self.team_key,
-                                                "pending_trade")
+        j = self.yhandler.get_team_transactions(
+            self.league_id, self.team_key, "pending_trade"
+        )
         t = objectpath.Tree(j)
         trans = []
-        trans_it = t.execute('''$..transaction.(transaction_key,
+        trans_it = t.execute("""$..transaction.(transaction_key,
                                                 status,
                                                 trader_team_key,
-                                                tradee_team_key)''')
+                                                tradee_team_key)""")
         for i, tran in enumerate(trans_it):
             tran["trader_players"] = []
             tran["tradee_players"] = []
@@ -280,9 +284,11 @@ class Team:
                 else:
                     tran["tradee_players"].append(plyr)
 
-            plyr_it = t.execute('''
+            plyr_it = t.execute(
+                """
                 $..transactions.'{}'..(player_id,full,position_type,
-                                      source_team_key)'''.format(i))
+                                      source_team_key)""".format(i)
+            )
             key_mapper = {"full": "name"}
             plyr = {}
             for elem in plyr_it:
@@ -320,8 +326,9 @@ class Team:
         xml = self._construct_trade_xml(transaction_key, "accept", trade_note)
         self.yhandler.put_transaction(transaction_key, xml)
 
-    def propose_trade(self, tradee_team_key: str, players: list[dict[str, str]],
-                      trade_note: str = "") -> None:
+    def propose_trade(
+        self, tradee_team_key: str, players: list[dict[str, str]], trade_note: str = ""
+    ) -> None:
         """
         Propose a trade
 
@@ -339,7 +346,9 @@ class Team:
         xml = self._construct_trade_proposal_xml(tradee_team_key, players, trade_note)
         self.yhandler.post_transactions(self.league_id, xml)
 
-    def _construct_trade_xml(self, transaction_key: str, action: str, trade_note: str) -> str:
+    def _construct_trade_xml(
+        self, transaction_key: str, action: str, trade_note: str
+    ) -> str:
         """Construct trade XML
         :param transaction_key: Key of the transaction
 
@@ -357,18 +366,23 @@ class Team:
         :rtype: str
         """
         doc = Document()
-        tran = doc.createElement('transaction')
-        doc.appendChild(doc.createElement('fantasy_content')).appendChild(tran)
+        tran = doc.createElement("transaction")
+        doc.appendChild(doc.createElement("fantasy_content")).appendChild(tran)
 
-        create_element(doc, tran, 'transaction_key', transaction_key)
-        create_element(doc, tran, 'type', 'pending_trade')
-        create_element(doc, tran, 'action', action)
-        create_element(doc, tran, 'trade_note', trade_note)
+        create_element(doc, tran, "transaction_key", transaction_key)
+        create_element(doc, tran, "type", "pending_trade")
+        create_element(doc, tran, "action", action)
+        create_element(doc, tran, "trade_note", trade_note)
 
         return doc.toprettyxml()
 
-    def _construct_trade_proposal_xml(self, tradee_team_key: str, your_player_keys: list[str],
-                                      their_players_keys: list[str], trade_note: str = "") -> str:
+    def _construct_trade_proposal_xml(
+        self,
+        tradee_team_key: str,
+        your_player_keys: list[str],
+        their_players_keys: list[str],
+        trade_note: str = "",
+    ) -> str:
         """
         Constructs a trade proposal XML.
 
@@ -388,108 +402,139 @@ class Team:
         :rtype: str
         """
         doc = Document()
-        transaction = doc.createElement('transaction')
-        doc.appendChild(doc.createElement('fantasy_content')).appendChild(transaction)
+        transaction = doc.createElement("transaction")
+        doc.appendChild(doc.createElement("fantasy_content")).appendChild(transaction)
 
-        create_element(doc, transaction, 'type', 'pending_trade')
-        create_element(doc, transaction, 'trader_team_key', self.team_key)
-        create_element(doc, transaction, 'tradee_team_key', tradee_team_key)
-        create_element(doc, transaction, 'trade_note', trade_note)
+        create_element(doc, transaction, "type", "pending_trade")
+        create_element(doc, transaction, "trader_team_key", self.team_key)
+        create_element(doc, transaction, "tradee_team_key", tradee_team_key)
+        create_element(doc, transaction, "trade_note", trade_note)
 
-        players_element = doc.createElement('players')
+        players_element = doc.createElement("players")
         transaction.appendChild(players_element)
 
         your_players = [
-            {"player_key": player_key, "source_team_key": self.team_key, "destination_team_key": tradee_team_key}
-            for player_key in your_player_keys]
+            {
+                "player_key": player_key,
+                "source_team_key": self.team_key,
+                "destination_team_key": tradee_team_key,
+            }
+            for player_key in your_player_keys
+        ]
         their_players = [
-            {"player_key": player_key, "source_team_key": tradee_team_key, "destination_team_key": self.team_key}
-            for player_key in their_players_keys]
+            {
+                "player_key": player_key,
+                "source_team_key": tradee_team_key,
+                "destination_team_key": self.team_key,
+            }
+            for player_key in their_players_keys
+        ]
 
         players = your_players + their_players
 
         for player in players:
-            player_element = doc.createElement('player')
+            player_element = doc.createElement("player")
             players_element.appendChild(player_element)
 
-            create_element(doc, player_element, 'player_key', player['player_key'])
+            create_element(doc, player_element, "player_key", player["player_key"])
 
-            transaction_data = doc.createElement('transaction_data')
+            transaction_data = doc.createElement("transaction_data")
             player_element.appendChild(transaction_data)
 
-            create_element(doc, transaction_data, 'type', 'pending_trade')
-            create_element(doc, transaction_data, 'source_team_key', player['source_team_key'])
-            create_element(doc, transaction_data, 'destination_team_key', player['destination_team_key'])
+            create_element(doc, transaction_data, "type", "pending_trade")
+            create_element(
+                doc, transaction_data, "source_team_key", player["source_team_key"]
+            )
+            create_element(
+                doc,
+                transaction_data,
+                "destination_team_key",
+                player["destination_team_key"],
+            )
 
         return doc.toprettyxml()
 
     def _construct_change_roster_xml(self, time_frame, modified_lineup):
         """Construct XML to pass to Yahoo! that will modified the positions"""
         doc = Document()
-        roster = doc.appendChild(doc.createElement('fantasy_content')) \
-            .appendChild(doc.createElement('roster'))
+        roster = doc.appendChild(doc.createElement("fantasy_content")).appendChild(
+            doc.createElement("roster")
+        )
 
         if isinstance(time_frame, datetime.date):
-            roster.appendChild(doc.createElement('coverage_type')) \
-                .appendChild(doc.createTextNode('date'))
-            roster.appendChild(doc.createElement('date')) \
-                .appendChild(doc.createTextNode(time_frame.strftime("%Y-%m-%d")))
+            roster.appendChild(doc.createElement("coverage_type")).appendChild(
+                doc.createTextNode("date")
+            )
+            roster.appendChild(doc.createElement("date")).appendChild(
+                doc.createTextNode(time_frame.strftime("%Y-%m-%d"))
+            )
         elif isinstance(time_frame, int):
-            roster.appendChild(doc.createElement('coverage_type')) \
-                .appendChild(doc.createTextNode('week'))
-            roster.appendChild(doc.createElement('week')) \
-                .appendChild(doc.createTextNode(str(time_frame)))
+            roster.appendChild(doc.createElement("coverage_type")).appendChild(
+                doc.createTextNode("week")
+            )
+            roster.appendChild(doc.createElement("week")).appendChild(
+                doc.createTextNode(str(time_frame))
+            )
         else:
-            raise RuntimeError("Invalid time_frame format. Must be datetime.date or int.")
+            raise RuntimeError(
+                "Invalid time_frame format. Must be datetime.date or int."
+            )
 
-        plyrs = roster.appendChild(doc.createElement('players'))
+        plyrs = roster.appendChild(doc.createElement("players"))
         for plyr in modified_lineup:
-            p = plyrs.appendChild(doc.createElement('player'))
-            p.appendChild(doc.createElement('player_key')) \
-                .appendChild(doc.createTextNode('{}.p.{}'.format(
-                    self.league_prefix, int(plyr['player_id']))))
-            p.appendChild(doc.createElement('position')) \
-                .appendChild(doc.createTextNode(plyr['selected_position']))
+            p = plyrs.appendChild(doc.createElement("player"))
+            p.appendChild(doc.createElement("player_key")).appendChild(
+                doc.createTextNode(
+                    "{}.p.{}".format(self.league_prefix, int(plyr["player_id"]))
+                )
+            )
+            p.appendChild(doc.createElement("position")).appendChild(
+                doc.createTextNode(plyr["selected_position"])
+            )
 
         return doc.toprettyxml()
 
     def _construct_transaction_xml(self, action, *player_ids, faab=None):
         doc = Document()
-        transaction = doc.appendChild(doc.createElement('fantasy_content')) \
-            .appendChild(doc.createElement('transaction'))
+        transaction = doc.appendChild(doc.createElement("fantasy_content")).appendChild(
+            doc.createElement("transaction")
+        )
 
-        transaction.appendChild(doc.createElement('type')) \
-            .appendChild(doc.createTextNode(action))
+        transaction.appendChild(doc.createElement("type")).appendChild(
+            doc.createTextNode(action)
+        )
 
         if faab is not None:
-            transaction.appendChild(doc.createElement("faab_bid")) \
-                .appendChild(doc.createTextNode(str(faab)))
+            transaction.appendChild(doc.createElement("faab_bid")).appendChild(
+                doc.createTextNode(str(faab))
+            )
 
-        if action == 'add/drop':
-            players = transaction.appendChild(doc.createElement('players'))
-            self._construct_transaction_player_xml(doc, players, player_ids[0],
-                                                   "add")
-            self._construct_transaction_player_xml(doc, players, player_ids[1],
-                                                   "drop")
+        if action == "add/drop":
+            players = transaction.appendChild(doc.createElement("players"))
+            self._construct_transaction_player_xml(doc, players, player_ids[0], "add")
+            self._construct_transaction_player_xml(doc, players, player_ids[1], "drop")
         else:
-            self._construct_transaction_player_xml(doc, transaction,
-                                                   player_ids[0], action)
+            self._construct_transaction_player_xml(
+                doc, transaction, player_ids[0], action
+            )
         return doc.toprettyxml()
 
     def _construct_transaction_player_xml(self, doc, root, player_id, action):
-        if action == 'add':
-            team_elem = 'destination_team_key'
-        elif action == 'drop':
-            team_elem = 'source_team_key'
+        if action == "add":
+            team_elem = "destination_team_key"
+        elif action == "drop":
+            team_elem = "source_team_key"
         else:
-            assert (False), 'Unknown action: ' + action
+            assert False, "Unknown action: " + action
 
-        player = root.appendChild(doc.createElement('player'))
-        player.appendChild(doc.createElement('player_key')) \
-            .appendChild(doc.createTextNode('{}.p.{}'.format(
-                self.league_prefix, int(player_id))))
-        tdata = player.appendChild(doc.createElement('transaction_data'))
-        tdata.appendChild(doc.createElement('type')) \
-            .appendChild(doc.createTextNode(action))
-        tdata.appendChild(doc.createElement(team_elem)) \
-            .appendChild(doc.createTextNode(self.team_key))
+        player = root.appendChild(doc.createElement("player"))
+        player.appendChild(doc.createElement("player_key")).appendChild(
+            doc.createTextNode("{}.p.{}".format(self.league_prefix, int(player_id)))
+        )
+        tdata = player.appendChild(doc.createElement("transaction_data"))
+        tdata.appendChild(doc.createElement("type")).appendChild(
+            doc.createTextNode(action)
+        )
+        tdata.appendChild(doc.createElement(team_elem)).appendChild(
+            doc.createTextNode(self.team_key)
+        )

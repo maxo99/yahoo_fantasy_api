@@ -14,24 +14,24 @@ def sc():
 
 @pytest.fixture()
 def mock_mlb_league(sc):
-    lg = yfa.League(sc, '370.l.56877', handler=mock_yhandler.YHandler())
+    lg = yfa.League(sc, "370.l.56877", handler=mock_yhandler.YHandler())
     yield lg
 
 
 @pytest.fixture()
 def mock_nhl_league(sc):
-    lg = yfa.League(sc, '396.l.21484', handler=mock_yhandler.YHandler())
+    lg = yfa.League(sc, "396.l.21484", handler=mock_yhandler.YHandler())
     yield lg
 
 
 @pytest.fixture()
 def mock_nfl_league(sc):
-    lg = yfa.League(sc, '449.l.75178', handler=mock_yhandler.YHandler())
+    lg = yfa.League(sc, "449.l.75178", handler=mock_yhandler.YHandler())
     yield lg
 
 
 @pytest.fixture()
 def mock_team(sc):
-    tm = yfa.Team(sc, '268.l.46645')
+    tm = yfa.Team(sc, "268.l.46645")
     tm.inject_yhandler(mock_yhandler.YHandler())
     yield tm

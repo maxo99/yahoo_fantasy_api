@@ -37,7 +37,7 @@ class League:
         self.stats_id_map = None
         self.player_details_cache = {}
         lg_settings = self.settings()
-        game_code = lg_settings['game_code']
+        game_code = lg_settings["game_code"]
         self._cache_stats_id_map(game_code)
 
     def inject_yhandler(self, yhandler):
@@ -67,7 +67,9 @@ class League:
         t = objectpath.Tree(json)
         team = {}
         try:
-            team_key = t.execute("$..teams..team[@[2].name is '{}']..team_key[0]".format(team_name))
+            team_key = t.execute(
+                "$..teams..team[@[2].name is '{}']..team_key[0]".format(team_name)
+            )
             team[team_name] = self.to_team(team_key)
         except StopIteration:
             pass
@@ -96,17 +98,17 @@ class League:
         """
         json = self.yhandler.get_standings_raw(self.league_id)
         t = objectpath.Tree(json)
-        num_teams = int(t.execute('$..count[0]'))
+        num_teams = int(t.execute("$..count[0]"))
         standings = []
         for i in range(num_teams):
             team = {}
             for e in t.execute('$..teams.."{}".team[0]'.format(i)):
                 if isinstance(e, list):
                     for td in e:
-                        if "team_key" in td or 'name' in td:
+                        if "team_key" in td or "name" in td:
                             self._merge_dicts(team, td, [])
                 elif "team_standings" in e:
-                    self._merge_dicts(team, e['team_standings'], [])
+                    self._merge_dicts(team, e["team_standings"], [])
             standings.append(team)
         return standings
 
@@ -133,14 +135,14 @@ class League:
         """
         json = self.yhandler.get_standings_raw(self.league_id)
         t = objectpath.Tree(json)
-        num_teams = int(t.execute('$..count[0]'))
+        num_teams = int(t.execute("$..count[0]"))
         teams = {}
         for i in range(num_teams):
             team = {}
             key = None
             for e in t.execute('$..teams.."{}".team[0][0]'.format(i)):
                 if "team_key" in e:
-                    key = e['team_key']
+                    key = e["team_key"]
                 if isinstance(e, dict):
                     self._merge_dicts(team, e, [])
             teams[key] = team
@@ -191,9 +193,11 @@ class League:
                     self._merge_dicts(data, content["league"][0], [])
                     # Filtering out 'roster_positions' and 'stat_categories'
                     # because they can be found in other APIs.
-                    self._merge_dicts(data,
-                                      content["league"][1]["settings"][0],
-                                      ["roster_positions", "stat_categories"])
+                    self._merge_dicts(
+                        data,
+                        content["league"][1]["settings"][0],
+                        ["roster_positions", "stat_categories"],
+                    )
             self.settings_cache = data
         return self.settings_cache
 
@@ -210,13 +214,17 @@ class League:
         """
         if self.stat_categories_cache is None:
             t = objectpath.Tree(self.yhandler.get_settings_raw(self.league_id))
-            json = t.execute('$..stat_categories..stat')
+            json = t.execute("$..stat_categories..stat")
             simple_stat = []
             for s in json:
                 # Omit stats that are only for display purposes
-                if 'is_only_display_stat' not in s:
-                    simple_stat.append({"display_name": s["display_name"],
-                                        "position_type": s["position_type"]})
+                if "is_only_display_stat" not in s:
+                    simple_stat.append(
+                        {
+                            "display_name": s["display_name"],
+                            "position_type": s["position_type"],
+                        }
+                    )
             self.stat_categories_cache = simple_stat
         return self.stat_categories_cache
 
@@ -230,10 +238,10 @@ class League:
         388.l.27081.t.5
         """
         t = objectpath.Tree(self.yhandler.get_teams_raw())
-        json = t.execute('$..(team_key)')
+        json = t.execute("$..(team_key)")
         for t in json:
-            if t['team_key'].startswith(self.league_id):
-                return t['team_key']
+            if t["team_key"].startswith(self.league_id):
+                return t["team_key"]
 
     def current_week(self):
         """Return the current week number of the league
@@ -245,9 +253,8 @@ class League:
         12
         """
         if self.current_week_cache is None:
-            t = objectpath.Tree(self.yhandler.get_scoreboard_raw(
-                self.league_id))
-            self.current_week_cache = int(t.execute('$..current_week[0]'))
+            t = objectpath.Tree(self.yhandler.get_scoreboard_raw(self.league_id))
+            self.current_week_cache = int(t.execute("$..current_week[0]"))
         return self.current_week_cache
 
     def end_week(self):
@@ -260,9 +267,8 @@ class League:
         24
         """
         if self.end_week_cache is None:
-            t = objectpath.Tree(
-                self.yhandler.get_scoreboard_raw(self.league_id))
-            self.end_week_cache = int(t.execute('$..end_week[0]'))
+            t = objectpath.Tree(self.yhandler.get_scoreboard_raw(self.league_id))
+            self.end_week_cache = int(t.execute("$..end_week[0]"))
         return self.end_week_cache
 
     def week_date_range(self, week):
@@ -283,16 +289,16 @@ class League:
         if week <= self.current_week() or week == 1:
             return self._date_range_of_played_or_current_week(week)
         elif week == self.current_week() + 1:
-            (cur_st, cur_end) = self._date_range_of_played_or_current_week(
-                week - 1)
+            (cur_st, cur_end) = self._date_range_of_played_or_current_week(week - 1)
             req_st = cur_end + datetime.timedelta(days=1)
             req_end = cur_end + datetime.timedelta(days=7)
             return (req_st, req_end)
         else:
-            raise RuntimeError("Cannot request date range more than one week "
-                               "past the current week.  The requested week is "
-                               "{}, but current week is {}.".format(
-                                   week, self.current_week()))
+            raise RuntimeError(
+                "Cannot request date range more than one week "
+                "past the current week.  The requested week is "
+                "{}, but current week is {}.".format(week, self.current_week())
+            )
 
     def free_agents(self, position):
         """Return the free agents for the given position
@@ -317,7 +323,8 @@ class League:
         """
         if position not in self.free_agent_cache:
             self.free_agent_cache[position] = self._fetch_players(
-                'FA', position=position)
+                "FA", position=position
+            )
         return self.free_agent_cache[position]
 
     def waivers(self):
@@ -347,7 +354,7 @@ class League:
           'percent_owned': 87}]
         """
         if not self.waivers_cache:
-            self.waivers_cache = self._fetch_players('W')
+            self.waivers_cache = self._fetch_players("W")
         return self.waivers_cache
 
     def taken_players(self):
@@ -368,7 +375,7 @@ class League:
          'status': ''}
         """
         if not self.taken_players_cache:
-            self.taken_players_cache = self._fetch_players('T')
+            self.taken_players_cache = self._fetch_players("T")
         return self.taken_players_cache
 
     def _fetch_players(self, status, position=None):
@@ -391,8 +398,9 @@ class League:
         plyrs = []
         plyrIndex = 0
         while plyrIndex % PLAYERS_PER_PAGE == 0:
-            j = self.yhandler.get_players_raw(self.league_id, plyrIndex,
-                                              status, position=position)
+            j = self.yhandler.get_players_raw(
+                self.league_id, plyrIndex, status, position=position
+            )
             (num_plyrs_on_pg, fa_on_pg) = self._players_from_page(j)
             if len(fa_on_pg) == 0:
                 break
@@ -413,30 +421,35 @@ class League:
         """
         fa = []
 
-        if len(page['fantasy_content']['league'][1]['players']) == 0:
+        if len(page["fantasy_content"]["league"][1]["players"]) == 0:
             return (0, fa)
 
         t = objectpath.Tree(page)
-        pct_owns = self._pct_owned_from_page(iter(list(t.execute(
-            '$..percent_owned.(coverage_type,value)'))))
+        pct_owns = self._pct_owned_from_page(
+            iter(list(t.execute("$..percent_owned.(coverage_type,value)")))
+        )
         # When iterating over the players we step by 2 to account for the
         # percent_owned data that is stored adjacent to each player.
-        for i, pct_own in zip(range(0, t.execute('$..players.count[0]') * 2, 2),
-                              pct_owns):
-            path = '$..players..player[{}].'.format(i) + \
-                "(name,player_id,position_type,status,eligible_positions)"
+        for i, pct_own in zip(
+            range(0, t.execute("$..players.count[0]") * 2, 2), pct_owns
+        ):
+            path = (
+                "$..players..player[{}].".format(i)
+                + "(name,player_id,position_type,status,eligible_positions)"
+            )
             obj = list(t.execute(path))
             plyr = {}
             # Convert obj from a list of dicts to a single one-dimensional dict
             for ele in obj:
                 for k in ele.keys():
                     plyr[k] = ele[k]
-            plyr['player_id'] = int(plyr['player_id'])
-            plyr['name'] = plyr['name']['full']
+            plyr["player_id"] = int(plyr["player_id"])
+            plyr["name"] = plyr["name"]["full"]
             # We want to return eligible positions in a concise format.
-            plyr['eligible_positions'] = [e['position'] for e in
-                                          plyr['eligible_positions']]
-            plyr['percent_owned'] = pct_own
+            plyr["eligible_positions"] = [
+                e["position"] for e in plyr["eligible_positions"]
+            ]
+            plyr["percent_owned"] = pct_own
             if "status" not in plyr:
                 plyr["status"] = ""
 
@@ -468,7 +481,7 @@ class League:
                     po.append(0)
                     i += 1
                 if "value" in ele:
-                    po[i - 1] = ele['value']
+                    po[i - 1] = ele["value"]
         except StopIteration:
             pass
         return po
@@ -484,12 +497,12 @@ class League:
         :rtype: Tuple of two :class: datetime.date objects
         """
         if week not in self.week_date_range_cache:
-            t = objectpath.Tree(self.yhandler.get_scoreboard_raw(
-                self.league_id, week))
-            j = t.execute('$..(week_start,week_end)[0]')
+            t = objectpath.Tree(self.yhandler.get_scoreboard_raw(self.league_id, week))
+            j = t.execute("$..(week_start,week_end)[0]")
             self.week_date_range_cache[week] = (
-                datetime.datetime.strptime(j['week_start'], "%Y-%m-%d").date(),
-                datetime.datetime.strptime(j['week_end'], "%Y-%m-%d").date())
+                datetime.datetime.strptime(j["week_start"], "%Y-%m-%d").date(),
+                datetime.datetime.strptime(j["week_end"], "%Y-%m-%d").date(),
+            )
         return self.week_date_range_cache[week]
 
     def player_details(self, player):
@@ -544,7 +557,7 @@ class League:
             for p in player:
                 players.append(self.player_details_cache[p])
         elif player in self.player_details_cache:
-            assert(isinstance(self.player_details_cache[player], list))
+            assert isinstance(self.player_details_cache[player], list)
             players = self.player_details_cache[player]
         return players
 
@@ -562,16 +575,19 @@ class League:
          {'player_id': 4003, 'name': 'Semyon Varlamov', 'percent_owned': 79},
          {'player_id': 3705, 'name': 'Dustin Byfuglien', 'percent_owned': 82}]
         """
-        t = objectpath.Tree(self.yhandler.get_percent_owned_raw(
-            self.league_id, player_ids))
+        t = objectpath.Tree(
+            self.yhandler.get_percent_owned_raw(self.league_id, player_ids)
+        )
         player_ids = t.execute("$..player_id")
         it = t.execute("$..(player_id,full,value)")
         po = []
         try:
             while True:
-                plyr = {"player_id": int(next(it)["player_id"]),
-                        "name": next(it)["full"],
-                        "percent_owned": next(it)["value"]}
+                plyr = {
+                    "player_id": int(next(it)["player_id"]),
+                    "name": next(it)["full"],
+                    "percent_owned": next(it)["value"],
+                }
                 po.append(plyr)
         except StopIteration:
             pass
@@ -588,12 +604,14 @@ class League:
         >>> lg.ownership([3737])
         {"3737" : {"ownership_tpye" : "team", "owner_team_name": "team name"}}
         """
-        t = objectpath.Tree(self.yhandler.get_player_ownership_raw(self.league_id, player_ids))
+        t = objectpath.Tree(
+            self.yhandler.get_player_ownership_raw(self.league_id, player_ids)
+        )
         owner_details = t.execute("$..(player_id,ownership_type,owner_team_name)")
         ownership = {}
         try:
             while True:
-                player_id = next(owner_details)['player_id']
+                player_id = next(owner_details)["player_id"]
                 ownership_details = next(owner_details)
                 ownership[player_id] = ownership_details
         except StopIteration:
@@ -609,9 +627,10 @@ class League:
         if self.edit_date_cache is None:
             json = self.yhandler.get_settings_raw(self.league_id)
             t = objectpath.Tree(json)
-            edit_key = t.execute('$..edit_key[0]')
-            self.edit_date_cache = \
-                datetime.datetime.strptime(edit_key, '%Y-%m-%d').date()
+            edit_key = t.execute("$..edit_key[0]")
+            self.edit_date_cache = datetime.datetime.strptime(
+                edit_key, "%Y-%m-%d"
+            ).date()
         return self.edit_date_cache
 
     def positions(self):
@@ -634,14 +653,14 @@ class League:
             json = self.yhandler.get_settings_raw(self.league_id)
             t = objectpath.Tree(json)
             pmap = {}
-            for p in t.execute('$..roster_position'):
-                pmap[p['position']] = {}
+            for p in t.execute("$..roster_position"):
+                pmap[p["position"]] = {}
                 for k, v in p.items():
-                    if k == 'position':
+                    if k == "position":
                         continue
-                    if k == 'count':
+                    if k == "count":
                         v = int(v)
-                    pmap[p['position']][k] = v
+                    pmap[p["position"]][k] = v
             self.positions_cache = pmap
         return self.positions_cache
 
@@ -708,18 +727,19 @@ class League:
             player_ids = [player_ids]
 
         lg_settings = self.settings()
-        game_code = lg_settings['game_code']
+        game_code = lg_settings["game_code"]
         self._cache_stats_id_map(game_code)
         stats = []
         while len(player_ids) > 0:
             next_player_ids = player_ids[0:25]
             player_ids = player_ids[25:]
-            stats += self._fetch_plyr_stats(next_player_ids,
-                                            req_type, date, week, season)
+            stats += self._fetch_plyr_stats(
+                next_player_ids, req_type, date, week, season
+            )
         return stats
 
     def draft_results(self):
-        '''
+        """
         Get the results of the league's draft
 
         This will return details about each pick made in the draft.  For
@@ -748,26 +768,26 @@ class League:
          'cost': '4',
          'team_key': '388.l.27081.t.4',
          'player_id': 9490}
-        '''
+        """
         j = self.yhandler.get_draftresults_raw(self.league_id)
         t = objectpath.Tree(j)
         dres = []
-        pat = re.compile(r'.*\.p\.([0-9]+)$')
-        for p in t.execute('$..draft_results..draft_result'):
+        pat = re.compile(r".*\.p\.([0-9]+)$")
+        for p in t.execute("$..draft_results..draft_result"):
             try:
-                pk = p['player_key']
+                pk = p["player_key"]
                 m = pat.search(pk)
                 if m:
                     pid = int(m.group(1))
-                    p['player_id'] = pid
-                    del p['player_key']
+                    p["player_id"] = pid
+                    del p["player_key"]
                 dres.append(p)
             except KeyError:
                 pass
-        return(dres)
+        return dres
 
     def transactions(self, tran_types, count):
-        '''
+        """
         Fetch transactions of a given type for the league.
 
         :param tran_types: The comman seperated types of transactions retrieve.  Valid values
@@ -786,9 +806,9 @@ class League:
             {'players': {...}, 'status': 'successful', 'timestamp': '1604650727', 'tradee_team_key': '399.l.710921.t.5', 'tradee_team_name': 'Nuklear JuJu Charks', 'trader_team_key': '399.l.710921.t.2', 'trader_team_name': 'JuJus Golden Johnson', 'transaction_id': '295', 'transaction_key': '399.l.710921.tr.295', ...},
             {'players': {...}, 'status': 'successful', 'timestamp': '1601773444', 'tradee_team_key': '399.l.710921.t.4', 'tradee_team_name': 'DJ chark juju juju', 'trader_team_key': '399.l.710921.t.9', 'trader_team_name': 'Too Many Cooks', 'transaction_id': '133', 'transaction_key': '399.l.710921.tr.133', ...}
         ]
-        '''
+        """
         j = self.yhandler.get_transactions_raw(self.league_id, tran_types, count)
-        t = objectpath.Tree(j).execute('$..transactions..transaction')
+        t = objectpath.Tree(j).execute("$..transactions..transaction")
         transactions = []
         for transaction_details in t:
             players = next(t)
@@ -796,7 +816,7 @@ class League:
         return transactions
 
     def _fetch_plyr_stats(self, player_ids, req_type, date, week, season):
-        '''
+        """
         Fetch player stats for at most 25 player IDs.
 
         :param game_code: Game code of the players we are fetching
@@ -807,43 +827,44 @@ class League:
         :param season: Season if request type is 'season'
         :return: The stats requested
         :rtype: list(dict)
-        '''
-        assert(len(player_ids) > 0 and len(player_ids) <= 25)
-        json = self.yhandler.get_player_stats_raw(self.league_id, player_ids,
-                                                  req_type, date, week, season)
+        """
+        assert len(player_ids) > 0 and len(player_ids) <= 25
+        json = self.yhandler.get_player_stats_raw(
+            self.league_id, player_ids, req_type, date, week, season
+        )
         t = objectpath.Tree(json)
         stats = []
         row = None
-        for e in t.execute('$..(full,player_id,position_type,stat,total)'):
-            if 'player_id' in e:
+        for e in t.execute("$..(full,player_id,position_type,stat,total)"):
+            if "player_id" in e:
                 if row is not None:
                     stats.append(row)
                 row = {}
-                row['player_id'] = int(e['player_id'])
-            elif 'full' in e:
-                row['name'] = e['full']
-            elif 'position_type' in e:
-                row['position_type'] = e['position_type']
-            elif 'stat' in e:
-                stat_id = int(e['stat']['stat_id'])
+                row["player_id"] = int(e["player_id"])
+            elif "full" in e:
+                row["name"] = e["full"]
+            elif "position_type" in e:
+                row["position_type"] = e["position_type"]
+            elif "stat" in e:
+                stat_id = int(e["stat"]["stat_id"])
                 try:
-                    val = float(e['stat']['value'])
+                    val = float(e["stat"]["value"])
                 except ValueError:
-                    val = e['stat']['value']
+                    val = e["stat"]["value"]
                 if stat_id in self.stats_id_map:
                     row[self.stats_id_map[stat_id]] = val
-            elif 'total' in e:
-                row['total_points'] = e['total']
+            elif "total" in e:
+                row["total_points"] = e["total"]
 
         if row is not None:
             stats.append(row)
         return stats
 
     def _cache_stats_id_map(self, game_code):
-        '''Ensure the self.stats_id_map is setup
+        """Ensure the self.stats_id_map is setup
 
         The self.stats_id_map will map the stat ID to a display name.
-        '''
+        """
         if self.stats_id_map is None:
             json = self.yhandler.get_settings_raw(self.league_id)
             t = objectpath.Tree(json)
@@ -851,80 +872,184 @@ class League:
             # generates a lot of stats, where as the ones we are getting the
             # settings are only the categories that scoring is based on.
             stats_id_map = self._get_static_id_map(game_code)
-            for s in t.execute('$..stat_categories..(stat_id,display_name)'):
-                stats_id_map[int(s['stat_id'])] = s['display_name']
+            for s in t.execute("$..stat_categories..(stat_id,display_name)"):
+                stats_id_map[int(s["stat_id"])] = s["display_name"]
             self.stats_id_map = stats_id_map
 
     def _get_static_id_map(self, game_code):
-        '''
+        """
         Get a static map of ID to stat names for specific sport
 
         If we lookup in league settings for a list of category names, it will
         just include the scoring categories for the fantasy league.  These
         static maps allow us to access additional stats.
-        '''
-        if game_code == 'mlb':
+        """
+        if game_code == "mlb":
             return self._get_static_mlb_id_map()
-        elif game_code == 'nhl':
+        elif game_code == "nhl":
             return self._get_static_nhl_id_map()
         else:
             return {}
 
     def _get_static_mlb_id_map(self):
-        '''
+        """
         Return a map that returns a statement given ID.
 
         This is tailored for major league baseball.
-        '''
-        return {0: 'G', 2: 'GS', 3: 'AVG', 4: 'OBP', 5: 'SLG', 6: 'AB', 7: 'R',
-                8: 'H', 9: '1B', 10: '2B', 11: '3B', 12: 'HR', 13: 'RBI',
-                14: 'SH', 15: 'SF', 16: 'SB', 17: 'CS', 18: 'BB', 19: 'IBB',
-                20: 'HBP', 21: 'SO', 22: 'GDP', 23: 'TB', 25: 'GS', 26: 'ERA',
-                27: 'WHIP', 28: 'W', 29: 'L', 32: 'SV', 34: 'H', 35: 'BF',
-                36: 'R', 37: 'ER', 38: 'HR', 39: 'BB', 40: 'IBB', 41: 'HBP',
-                42: 'K', 43: 'BK', 44: 'WP', 48: 'HLD', 50: 'IP', 51: 'PO',
-                52: 'A', 53: 'E', 54: 'FLD%', 55: 'OPS', 56: 'SO/W', 57: 'SO9',
-                65: 'PA', 84: 'BS', 85: 'NSV', 87: 'DP',
-                1032: 'FIP', 1021: 'GB%', 1022: 'FB%', 1031: 'BABIP',
-                1036: 'HR/FB%', 1037: 'GB', 1038: 'FB', 1020: 'GB/FB',
-                1018: 'P/IP', 1034: 'ERA-', 1019: 'P/S', 1024: 'STR',
-                1025: 'IRS%', 1026: 'RS', 1027: 'RS/9', 1028: 'AVG',
-                1029: 'OBP', 1030: 'SLG', 1033: 'WAR',
-                1035: 'HR/FB%', 1008: 'GB/FB', 1013: 'BABIP', 1002: 'ISO',
-                1001: 'CT%', 1014: 'wOBA', 1015: 'wRAA', 1011: 'RC',
-                1005: 'TOB', 1006: 'GB', 1009: 'GB%', 1007: 'FB', 1010: 'FB%',
-                1016: 'OPS+', 1004: 'P/PA', 1039: 'SB%', 1012: 'GDPR',
-                1003: 'SL', 1017: 'FR', 1040: 'bWAR', 1041: 'brWAR',
-                1042: 'WAR'}
+        """
+        return {
+            0: "G",
+            2: "GS",
+            3: "AVG",
+            4: "OBP",
+            5: "SLG",
+            6: "AB",
+            7: "R",
+            8: "H",
+            9: "1B",
+            10: "2B",
+            11: "3B",
+            12: "HR",
+            13: "RBI",
+            14: "SH",
+            15: "SF",
+            16: "SB",
+            17: "CS",
+            18: "BB",
+            19: "IBB",
+            20: "HBP",
+            21: "SO",
+            22: "GDP",
+            23: "TB",
+            25: "GS",
+            26: "ERA",
+            27: "WHIP",
+            28: "W",
+            29: "L",
+            32: "SV",
+            34: "H",
+            35: "BF",
+            36: "R",
+            37: "ER",
+            38: "HR",
+            39: "BB",
+            40: "IBB",
+            41: "HBP",
+            42: "K",
+            43: "BK",
+            44: "WP",
+            48: "HLD",
+            50: "IP",
+            51: "PO",
+            52: "A",
+            53: "E",
+            54: "FLD%",
+            55: "OPS",
+            56: "SO/W",
+            57: "SO9",
+            65: "PA",
+            84: "BS",
+            85: "NSV",
+            87: "DP",
+            1032: "FIP",
+            1021: "GB%",
+            1022: "FB%",
+            1031: "BABIP",
+            1036: "HR/FB%",
+            1037: "GB",
+            1038: "FB",
+            1020: "GB/FB",
+            1018: "P/IP",
+            1034: "ERA-",
+            1019: "P/S",
+            1024: "STR",
+            1025: "IRS%",
+            1026: "RS",
+            1027: "RS/9",
+            1028: "AVG",
+            1029: "OBP",
+            1030: "SLG",
+            1033: "WAR",
+            1035: "HR/FB%",
+            1008: "GB/FB",
+            1013: "BABIP",
+            1002: "ISO",
+            1001: "CT%",
+            1014: "wOBA",
+            1015: "wRAA",
+            1011: "RC",
+            1005: "TOB",
+            1006: "GB",
+            1009: "GB%",
+            1007: "FB",
+            1010: "FB%",
+            1016: "OPS+",
+            1004: "P/PA",
+            1039: "SB%",
+            1012: "GDPR",
+            1003: "SL",
+            1017: "FR",
+            1040: "bWAR",
+            1041: "brWAR",
+            1042: "WAR",
+        }
 
     def _get_static_nhl_id_map(self):
-        '''
+        """
         Return a map that returns a statement given ID.
 
         This is tailored for NHL.
-        '''
-        return {0: 'GP', 1: 'G', 2: 'A', 3: 'PTS', 4: '+/-', 5: 'PIM',
-                6: 'PPG', 7: 'PPA', 8: 'PPP', 12: 'GWG', 14: 'SOG', 15: 'S%',
-                18: 'GS', 19: 'W', 20: 'L', 22: 'GA', 23: 'GAA',
-                24: 'SA', 25: 'SV', 26: 'SV%', 27: 'SHO', 28: 'MIN',
-                1001: 'PPT', 1002: 'Avg-PPT', 1003: 'SHT', 1004: 'Avg-SHT',
-                1005: 'COR', 1006: 'FEN', 1007: 'Off-ZS', 1008: 'Def-ZS',
-                1009: 'ZS-Pct', 1010: 'GStr', 1011: 'Shifts'}
+        """
+        return {
+            0: "GP",
+            1: "G",
+            2: "A",
+            3: "PTS",
+            4: "+/-",
+            5: "PIM",
+            6: "PPG",
+            7: "PPA",
+            8: "PPP",
+            12: "GWG",
+            14: "SOG",
+            15: "S%",
+            18: "GS",
+            19: "W",
+            20: "L",
+            22: "GA",
+            23: "GAA",
+            24: "SA",
+            25: "SV",
+            26: "SV%",
+            27: "SHO",
+            28: "MIN",
+            1001: "PPT",
+            1002: "Avg-PPT",
+            1003: "SHT",
+            1004: "Avg-SHT",
+            1005: "COR",
+            1006: "FEN",
+            1007: "Off-ZS",
+            1008: "Def-ZS",
+            1009: "ZS-Pct",
+            1010: "GStr",
+            1011: "Shifts",
+        }
 
     def _merge_dicts(self, target, source, filter):
-        '''
+        """
         Helper to merge two dicts together
-        '''
-        assert(isinstance(source, dict))
-        assert(isinstance(target, dict))
+        """
+        assert isinstance(source, dict)
+        assert isinstance(target, dict)
         for key, value in source.items():
             if key not in filter:
                 target[key] = value
 
     def _parse_player_detail(self, plyr):
-        '''
+        """
         Helper to produce a meaningful dict for player details API
-        '''
+        """
         player_data = {}
         for category in plyr:
             for sub_category in category:
@@ -936,29 +1061,30 @@ class League:
         return player_data
 
     def _cache_player_details(self, player):
-        '''
+        """
         Helper to ensure request for player is in the cache.
-        '''
+        """
         lookup = self._calc_lookup_for_player_detail(player)
-        while lookup is not None and (not isinstance(lookup, list) or
-                                      len(lookup) > 0):
+        while lookup is not None and (not isinstance(lookup, list) or len(lookup) > 0):
             if isinstance(player, list):
                 ids = lookup.pop()
-                t = objectpath.Tree(self.yhandler.get_player_raw(
-                    self.league_id, ids=ids))
+                t = objectpath.Tree(
+                    self.yhandler.get_player_raw(self.league_id, ids=ids)
+                )
             else:
-                t = objectpath.Tree(self.yhandler.get_player_raw(
-                    self.league_id, search=lookup))
+                t = objectpath.Tree(
+                    self.yhandler.get_player_raw(self.league_id, search=lookup)
+                )
                 key = lookup
                 lookup = None
 
-            for json in t.execute('$..players'):
+            for json in t.execute("$..players"):
                 if json == []:
                     continue
-                for i in range(int(json['count'])):
-                    details = self._parse_player_detail(json[str(i)]['player'])
-                    if isinstance(lookup, list):   # Cache by player ID
-                        key = int(details['player_id'])
+                for i in range(int(json["count"])):
+                    details = self._parse_player_detail(json[str(i)]["player"])
+                    if isinstance(lookup, list):  # Cache by player ID
+                        key = int(details["player_id"])
                         self.player_details_cache[key] = details
                     else:  # Cache by search string
                         if key not in self.player_details_cache:
@@ -966,7 +1092,7 @@ class League:
                         self.player_details_cache[key].append(details)
 
     def _calc_lookup_for_player_detail(self, player):
-        '''
+        """
         Helper to figure the players that cannot be fulfilled from cache
 
         :param player:  The search or id request for player_detail.  This can
@@ -975,7 +1101,7 @@ class League:
             already in the cache.  If player is a list, this is a list of
             lists.  The lists are player IDs we need to get from Yahoo.  This
             list can be empty if all player IDs are in the cache.
-        '''
+        """
         if isinstance(player, list):
             # Figure out the players in the list that have already been fetched
             fetch_list = []

@@ -2,7 +2,7 @@
 
 import datetime
 
-YAHOO_ENDPOINT = 'https://fantasysports.yahooapis.com/fantasy/v2'
+YAHOO_ENDPOINT = "https://fantasysports.yahooapis.com/fantasy/v2"
 
 
 class YHandler:
@@ -19,8 +19,9 @@ class YHandler:
         :return: JSON document of the response
         :raises: RuntimeError if any response comes back with an error
         """
-        response = self.sc.session.get("{}/{}".format(YAHOO_ENDPOINT, uri),
-                                       params={'format': 'json'})
+        response = self.sc.session.get(
+            "{}/{}".format(YAHOO_ENDPOINT, uri), params={"format": "json"}
+        )
         if response.status_code != 200:
             raise RuntimeError(response.content)
         jresp = response.json()
@@ -36,9 +37,10 @@ class YHandler:
         :return: XML document of the response
         :raises: RuntimeError if any response comes back with an error
         """
-        headers = {'Content-Type': 'application/xml'}
-        response = self.sc.session.put("{}/{}".format(YAHOO_ENDPOINT, uri),
-                                       data=data, headers=headers)
+        headers = {"Content-Type": "application/xml"}
+        response = self.sc.session.put(
+            "{}/{}".format(YAHOO_ENDPOINT, uri), data=data, headers=headers
+        )
         if response.status_code != 200:
             raise RuntimeError(response.content)
         return response
@@ -53,9 +55,10 @@ class YHandler:
         :return: XML document of the response
         :raises: RuntimeError if any response comes back with an error
         """
-        headers = {'Content-Type': 'application/xml'}
-        response = self.sc.session.post("{}/{}".format(YAHOO_ENDPOINT, uri),
-                                        data=data, headers=headers)
+        headers = {"Content-Type": "application/xml"}
+        response = self.sc.session.post(
+            "{}/{}".format(YAHOO_ENDPOINT, uri), data=data, headers=headers
+        )
         if response.status_code != 201:
             raise RuntimeError(response.content)
         return response
@@ -66,10 +69,12 @@ class YHandler:
         :return: JSON document of the request.
         """
         return self.get("users;use_login=1/games/teams")
-    
-    def get_leagues_raw(self, is_available=False, game_types=None, game_codes=None, seasons=None):
+
+    def get_leagues_raw(
+        self, is_available=False, game_types=None, game_codes=None, seasons=None
+    ):
         """Return the raw JSON when requesting the logged in players leagues.
-        
+
         :param is_available: Filter the leagues to only those that are Available
         :type is_available: bool
         :param game_types: Filter the leagues to only those that are of the given types
@@ -84,7 +89,11 @@ class YHandler:
         game_types = ",".join(game_types) if game_types is not None else ""
         game_codes = ",".join(game_codes) if game_codes is not None else ""
         seasons = ",".join(seasons) if seasons is not None else ""
-        return self.get("users/games/leagues?use_login=1&is_available={}&game_types={}&game_codes={}&seasons={}".format(is_available, game_types, game_codes, seasons))
+        return self.get(
+            "users/games/leagues?use_login=1&is_available={}&game_types={}&game_codes={}&seasons={}".format(
+                is_available, game_types, game_codes, seasons
+            )
+        )
 
     def get_teams_by_keys_raw(self, team_keys):
         """Return the raw JSON when requesting details of a team.
@@ -186,8 +195,10 @@ class YHandler:
         else:
             pos_parm = ";position={}".format(position)
         return self.get(
-            "league/{}/players;start={};count=25;status={}{}/percent_owned".
-            format(league_id, start, status, pos_parm))
+            "league/{}/players;start={};count=25;status={}{}/percent_owned".format(
+                league_id, start, status, pos_parm
+            )
+        )
 
     def get_player_raw(self, league_id, search=None, ids=None):
         """Return the raw JSON when requesting player details
@@ -202,19 +213,18 @@ class YHandler:
         :return: JSON document of the request.
         """
         if search is not None:
-            assert(ids is None)
+            assert ids is None
             players_uri = "search={}".format(search)
         elif ids is not None and len(ids) > 0:
-            assert(search is None)
+            assert search is None
             # Construct a player key by prefixing the start of the league ID
-            lg_pref = league_id[0:league_id.find('.')]
+            lg_pref = league_id[0 : league_id.find(".")]
             players_uri = "player_keys=" + ",".join(
-                "{}.p.{}".format(lg_pref, i) for i in ids)
+                "{}.p.{}".format(lg_pref, i) for i in ids
+            )
         else:
-            raise RuntimeError(
-                "Must use search or ids options to filter players.")
-        return self.get("league/{}/players;{}/stats".format(league_id,
-                                                            players_uri))
+            raise RuntimeError("Must use search or ids options to filter players.")
+        return self.get("league/{}/players;{}/stats".format(league_id, players_uri))
 
     def get_percent_owned_raw(self, league_id, player_ids):
         """Return the raw JSON when requesting the percentage owned of players
@@ -225,11 +235,13 @@ class YHandler:
         :type player_ids: list(str)
         :return: JSON document of the request
         """
-        lg_pref = league_id[0:league_id.find(".")]
+        lg_pref = league_id[0 : league_id.find(".")]
         joined_ids = ",".join([lg_pref + ".p." + str(i) for i in player_ids])
         return self.get(
-            "league/{}/players;player_keys={}/percent_owned".
-            format(league_id, joined_ids))
+            "league/{}/players;player_keys={}/percent_owned".format(
+                league_id, joined_ids
+            )
+        )
 
     def get_player_ownership_raw(self, league_id, player_ids):
         """Return the raw JSON when requesting the ownership of players
@@ -240,11 +252,11 @@ class YHandler:
         :type player_ids: list(int)
         :return: JSON document of the request
         """
-        lg_pref = league_id[0:league_id.find(".")]
+        lg_pref = league_id[0 : league_id.find(".")]
         joined_ids = ",".join([lg_pref + ".p." + str(i) for i in player_ids])
         return self.get(
-            "league/{}/players;player_keys={}/ownership".
-            format(league_id, joined_ids))
+            "league/{}/players;player_keys={}/ownership".format(league_id, joined_ids)
+        )
 
     def put_roster(self, team_key, xml):
         """Calls PUT against the roster API passing it an xml document
@@ -282,7 +294,9 @@ class YHandler:
         """
         return self.get(
             "league/{}/transactions;team_key={};type={}".format(
-                league_id, team_key, tran_type))
+                league_id, team_key, tran_type
+            )
+        )
 
     def get_transactions_raw(self, league_id, tran_types, count):
         """
@@ -300,7 +314,9 @@ class YHandler:
         """
         return self.get(
             "league/{}/transactions;types={};count={}".format(
-                league_id, tran_types, count))
+                league_id, tran_types, count
+            )
+        )
 
     def put_transaction(self, transaction_key, xml):
         """
@@ -315,8 +331,7 @@ class YHandler:
         """
         return self.put("transaction/" + str(transaction_key), xml)
 
-    def get_player_stats_raw(self, league_id, player_ids, req_type, date,
-                             week, season):
+    def get_player_stats_raw(self, league_id, player_ids, req_type, date, week, season):
         """
         GET stats for a list of player IDs
 
@@ -337,8 +352,9 @@ class YHandler:
         :type season: int
         :return: Response from the GET call
         """
-        uri = self._build_player_stats_uri(league_id, player_ids, req_type,
-                                           date, week, season)
+        uri = self._build_player_stats_uri(
+            league_id, player_ids, req_type, date, week, season
+        )
         return self.get(uri)
 
     def get_draftresults_raw(self, league_id):
@@ -351,8 +367,9 @@ class YHandler:
         """
         return self.get("league/{}/draftresults".format(league_id))
 
-    def _build_player_stats_uri(self, league_id, player_ids, req_type, date,
-                                week, season):
+    def _build_player_stats_uri(
+        self, league_id, player_ids, req_type, date, week, season
+    ):
         uri = "league/{}/players;player_keys=".format(league_id)
         game_code = league_id[:3]
         if isinstance(player_ids, list):
@@ -364,32 +381,32 @@ class YHandler:
         return uri
 
     def _get_stats_type(self, req_type, date, week, season):
-        if req_type == 'season':
+        if req_type == "season":
             if season is None:
                 return "type=season"
             else:
                 return "type=season;season={}".format(season)
-        elif req_type == 'week':
+        elif req_type == "week":
             if week is None:
                 return "type=week"
             else:
                 return "type=week;week={}".format(week)
-        elif req_type == 'average_season':
+        elif req_type == "average_season":
             if season is None:
                 return "type=average_season"
             else:
                 return "type=average_season;season={}".format(season)
-        elif req_type == 'date':
+        elif req_type == "date":
             if date is None:
                 date = datetime.date.today()
             if isinstance(date, datetime.date) or isinstance(date, datetime.datetime):
                 return "type=date;date={}".format(date.strftime("%Y-%m-%d"))
             else:
                 return "type=date;date={}".format(date)
-        elif req_type in ['lastweek', 'lastmonth']:
+        elif req_type in ["lastweek", "lastmonth"]:
             return "type={}".format(req_type)
         else:
-            assert(False), "Unknown req_type type: {}".format(req_type)
+            assert False, "Unknown req_type type: {}".format(req_type)
 
     def get_game_raw(self, game_code):
         """Return the raw JSON when requesting details of a game.
