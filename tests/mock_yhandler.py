@@ -12,7 +12,7 @@ class YHandler:
     """
 
     def __init__(self):
-        self.dir_path = os.path.dirname(os.path.realpath(__file__))
+        self.dir_path = os.path.dirname(os.path.realpath(__file__)) + os.sep + "samples"
 
     def get_leagues_raw(
         self, is_available=False, game_types=None, game_codes=None, seasons=None

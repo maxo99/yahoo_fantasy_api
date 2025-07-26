@@ -8,9 +8,14 @@
             "when": "$(basename).py"
         },
         "**/__pycache__": true,
-        "**/.pytest_cache": true,
+        ".pytest_cache": true,
         "**/*.egg-info": true,
         "**/*.venv": true,
         "**/*.ruff_cache": true,
-    }
+    },
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }
