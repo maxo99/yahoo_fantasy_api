@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.1.1 (2025-08-14)
+
+### Bug Fixes
+
+- Ci workflows + repo formatting
+  ([`6d44a3a`](https://github.com/maxo99/yahoo_fantasy_api/commit/6d44a3a621075121b155f5cd5a1bc57ab37fa4dc))
+
+### Refactoring
+
+- Repo cleanup + oauth relative path loading
+  ([`50e73a0`](https://github.com/maxo99/yahoo_fantasy_api/commit/50e73a0b9c8d4776224d584458196f821625059d))
+
+
 ## v0.1.0 (2025-08-14)
 
 ### Bug Fixes
