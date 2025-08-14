@@ -115,6 +115,13 @@ allow_zero_version = true
 upload_to_vcs_release = true
 
 
+[tool.semantic_release.branches.other]
+match = ".*"
+# prerelease_token = "rc"
+# prerelease = true
+
+
+
 [tool.semantic_release.commit_parser_options]
 allowed_tags = [
     "build",
