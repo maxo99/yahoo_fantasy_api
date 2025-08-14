@@ -4,4 +4,5 @@ from .game import Game
 from .league import League
 from .team import Team
 
+__version__ = "0.0.0"
 __all__ = ["Game", "League", "Team", "OAuth2Manager"]

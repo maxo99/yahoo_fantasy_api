@@ -18,7 +18,7 @@ from yahoo_fantasy_api import oauth2_logger
 import json
 
 
-if __name__ == '__main__':
+def main():
     args = docopt(__doc__, version='1.0')
     oauth2_logger.cleanup()
     sc = OAuth2(None, None, from_file=args['<json>'])
@@ -41,3 +41,7 @@ if __name__ == '__main__':
         player_and_team = "Player: {:30} Team: {:30}".format(
             plyr[0]['name']['full'], team_map[dp['team_key']])
         print(pick_and_cost + player_and_team)
+
+
+if __name__ == '__main__':
+    main()

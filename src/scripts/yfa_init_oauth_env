@@ -18,13 +18,14 @@ Options:
   -k, --key=id     The consumer key to use
   -s, --secret=id  The consumer secret to use
 """
+import json
+import os
+
 from docopt import docopt
 from yahoo_oauth import OAuth2
-import os
-import json
 
 
-if __name__ == '__main__':
+def main():
     args = docopt(__doc__, version='1.0')
 
     # If the JSON file does not exist, when we init it will redirect to a
@@ -50,3 +51,7 @@ if __name__ == '__main__':
     oauth = OAuth2(None, None, from_file=args['<json>'])
     if not oauth.token_is_valid():
         oauth.refresh_access_token()
+
+
+if __name__ == '__main__':
+    main()

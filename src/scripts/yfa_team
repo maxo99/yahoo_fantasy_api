@@ -11,13 +11,13 @@ Usage:
                league ID.
   <week>       The week we want to show the roster and matchup for.
 """
+import yahoo_fantasy_api as yfa
 from docopt import docopt
 from yahoo_oauth import OAuth2
-import yahoo_fantasy_api as yfa
 from yahoo_fantasy_api import oauth2_logger
 
 
-if __name__ == '__main__':
+def main():
     args = docopt(__doc__, version='1.0')
     oauth2_logger.cleanup()
     sc = OAuth2(None, None, from_file=args['<json>'])
@@ -30,3 +30,7 @@ if __name__ == '__main__':
     print("Roster")
     for plyr in tm.roster(args['<week>']):
         print(plyr)
+
+
+if __name__ == '__main__':
+    main()

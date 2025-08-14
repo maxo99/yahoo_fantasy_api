@@ -1,13 +1,41 @@
 [project]
 name = "yahoo_fantasy_api"
-version = "0.1.0"
-requires-python = ">=3.13"
+version = "0.0.0"
+description = "Python bindings to access the Yahoo! Fantasy APIs (Fork by maxo99)"
+readme = "README.rst"
+requires-python = ">=3.7"
+license = {text = "MIT"}
+authors = [
+    {name = "Matt Spilchen", email = "matt.spilchen@gmail.com"}
+]
+maintainers = [
+    {name = "maxo99"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+urls = {homepage = "http://github.com/spilchen/yahoo_fantasy_api", repository = "http://github.com/maxo99/yahoo_fantasy_api"}
 dependencies = [
     "docopt>=0.6.2",
     "objectpath>=0.6.1",
     "pytz>=2025.2",
     "yahoo-oauth>=2.1.1",
 ]
+
+[project.scripts]
+yfa_draft_results = "scripts.yfa_draft_results:main"
+yfa_init_oauth_env = "scripts.yfa_init_oauth_env:main"
+yfa_league = "scripts.yfa_league:main"
+yfa_team = "scripts.yfa_team:main"
 
 [dependency-groups]
 dev = [
@@ -30,7 +58,7 @@ build-backend = "uv_build"
 
 [tool.setuptools.packages.find]
 where = ['src']
-include = ['yahoo_fantasy_api*']
+include = ['yahoo_fantasy_api*', 'scripts*']
 
 
 [tool.uv.sources]
@@ -67,7 +95,42 @@ ignore = [
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = ["tests"]
+addopts = ["--verbose"]
+python_files = ["test_*.py"]
 log_cli = true
 log_cli_level = "INFO"
 log_cli_format = "%(asctime)s [%(levelname)8s] %(name)s: %(message)s"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+version_variables = ["src/yahoo_fantasy_api/__init__.py:__version__"]
+branch = "morr"
+upload_to_pypi = false
+upload_to_release = true
+build_command = "pip install uv && uv build"
+tag_format = "2.12.0-maxo99-v{version}"
+major_on_zero = false
+allow_zero_version = true
+upload_to_vcs_release = true
+
+
+[tool.semantic_release.commit_parser_options]
+allowed_tags = [
+    "build",
+    "chore",
+    "ci",
+    "docs",
+    "feat",
+    "fix",
+    "perf",
+    "style",
+    "refactor",
+    "test",
+]
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf"]
+
+
+[tool.semantic_release.changelog.default_templates]
+changelog_file = "CHANGELOG.md"
