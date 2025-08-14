@@ -1,6 +1,6 @@
 [project]
 name = "yahoo_fantasy_api"
-version = "0.0.0"
+version = "0.1.0"
 description = "Python bindings to access the Yahoo! Fantasy APIs (Fork by maxo99)"
 readme = "README.rst"
 requires-python = ">=3.7"
